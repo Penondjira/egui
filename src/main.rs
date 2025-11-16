@@ -1,71 +1,43 @@
-use eframe::egui::{self, Id};
+use eframe::egui::{self, pos2, Color32, Id, Rect, Sense};
 
-struct MyApp {
-    value1: i32,
-    value2: i32,
-    value3: i32,
+const PIP_WIDTH: f32 = 100.0;
+const PIP_HEIGHT: f32 = 20.0;
+const PIP_SPACING: f32 = 10.0;
+const ROOM_SPACING: f32 = 50.0;
+
+struct Pip {
+    width: f32,
+    height: f32,
 }
 
-impl Default for MyApp {
-    fn default() -> Self {
+impl Pip {
+    fn new() -> Self {
         Self {
-            value1: 0,
-            value2: 0,
-            value3: 0,
+            width: PIP_WIDTH,
+            height: PIP_HEIGHT,
         }
     }
 }
 
-impl eframe::App for MyApp {
+impl eframe::App for Pip {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // Use CentralPanel to take up all available space.
         egui::CentralPanel::default().show(ctx, |_ui| {
-            // Apply a centered layout for both horizontal and vertical alignment.
-            egui::Area::new(Id::new("centered area"))
+            egui::Area::new(Id::new("cenetered"))
                 .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::ZERO)
                 .show(ctx, |ui| {
-                    ui.vertical(|ui| {
-                        // Use a horizontal layout for the buttons.
-                        // Add some spacing to separate the buttons.
-                        ui.spacing_mut().item_spacing = egui::Vec2::new(10.0, 10.0);
-
-                        // Center the vertical layout itself.
-                        ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                            // First incrementer button
-                            ui.horizontal(|ui| {
-                                if ui.button("Increment 1").clicked() {
-                                    self.value1 += 1;
-                                }
-                                ui.label(format!("Count: {}", self.value1));
-                            });
-
-                            // Second incrementer button
-                            ui.horizontal(|ui| {
-                                if ui.button("Increment 2").clicked() {
-                                    self.value2 += 1;
-                                }
-                                ui.label(format!("Count: {}", self.value2));
-                            });
-
-                            // Third incrementer button
-                            ui.horizontal(|ui| {
-                                if ui.button("Increment 3").clicked() {
-                                    self.value3 += 1;
-                                }
-                                ui.label(format!("Count: {}", self.value3));
-                            });
-                        });
-                    });
+                    ui.allocate_exact_size(
+                        egui::Vec2 {
+                            x: (self.width),
+                            y: (self.height),
+                        },
+                        Sense::click(),
+                    )
                 });
         });
     }
 }
 
-fn main() -> eframe::Result<()> {
-    let native_options = eframe::NativeOptions::default();
-    eframe::run_native(
-        "Centered Incrementers",
-        native_options,
-        Box::new(|_cc| Ok(Box::new(MyApp::default()))),
-    )
+fn main() {
+    let options = eframe::NativeOptions::default();
+    let _ = eframe::run_native("variety", options, Box::new(|_cc| Ok(Box::new(Pip::new()))));
 }
