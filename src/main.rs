@@ -1,4 +1,4 @@
-use eframe::egui::{self, Align2, Id, Sense, Vec2};
+use eframe::egui::{self, Align2, Id, Key, Sense, Vec2};
 
 const CORRECT_VALUES: &'static [i32] = &[3, 4, 8, 5];
 
@@ -10,10 +10,27 @@ struct PowerDisplay {
     room_labels: Vec<String>,
     room_values: Vec<i32>,
     is_correct: bool,
+    close_button: Key,
 }
 
 impl eframe::App for PowerDisplay {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        let mut should_close = false;
+        let mut should_reset = false;
+        ctx.input(|i| {
+            if i.key_down(self.close_button) {
+                should_close = true;
+            }
+            if i.key_down(Key::R) {
+                should_reset = true;
+            }
+        });
+        if should_close {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+        }
+        if should_reset {
+            _reset();
+        }
         egui::CentralPanel::default().show(ctx, |ui| {
             if ui
                 .add_sized([200.0, 50.0], egui::Button::new("Activate"))
@@ -112,7 +129,10 @@ fn main() {
                 ],
                 room_values: vec![3, 4, 8, 5],
                 is_correct: false,
+                close_button: Key::Q,
             }))
         }),
     );
 }
+
+fn _reset() {}
