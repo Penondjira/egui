@@ -136,3 +136,6 @@ fn main() {
 }
 
 fn _reset() {}
+fn turn_on() {
+
+}
