@@ -1,6 +1,12 @@
 use eframe::egui::{self, Align2, Id, Key, Sense, Vec2};
+use reqwest::blocking::Client;
+use rppal::gpio::Gpio;
+use std::thread;
+use std::time::Duration;
 
 const CORRECT_VALUES: &'static [i32] = &[3, 4, 8, 5];
+// BCM GPIO 23 is physical pin 16
+const GPIO_LED: u8 = 23;
 
 struct PowerDisplay {
     pip_width: f32,
@@ -10,6 +16,7 @@ struct PowerDisplay {
     room_labels: Vec<String>,
     room_values: Vec<i32>,
     is_correct: bool,
+    has_turned_on: bool,
     close_button: Key,
 }
 
@@ -48,6 +55,10 @@ impl eframe::App for PowerDisplay {
             }
             if self.is_correct {
                 ui.label("Access Granted");
+                if !self.has_turned_on {
+                    self.has_turned_on = true;
+                    turn_on();
+                }
             } else {
                 ui.label("Access Denied");
             }
@@ -129,6 +140,7 @@ fn main() {
                 ],
                 room_values: vec![3, 4, 8, 5],
                 is_correct: false,
+                has_turned_on: false,
                 close_button: Key::Q,
             }))
         }),
@@ -137,5 +149,17 @@ fn main() {
 
 fn _reset() {}
 fn turn_on() {
+    let mut pin = Gpio::new().unwrap().get(GPIO_LED).unwrap().into_output();
+    pin.set_high();
+    pin.set_high();
+    thread::sleep(Duration::from_millis(500));
+    pin.set_low();
+    thread::sleep(Duration::from_millis(500));
+    let url = "http://10.0.0.156/api/control";
+    let client = Client::new();
 
+    let _ = client
+        .get(url)
+        .query(&[("target", "outlet2"), ("action", "on")])
+        .send();
 }
